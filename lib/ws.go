@@ -1,19 +1,44 @@
 package lib
 
 import (
-	"github.com/vmihailenco/msgpack"
+	"log"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
-type Message struct {
-	Content  string
-	UserId   string
-	UnixTime int64
-}
+// Upgrader - ws upgrader
+var upgrader = websocket.Upgrader{}
 
-func MarshallMsg(msg *Message) ([]byte, error) {
-	return msgpack.Marshal(msg)
-}
+// StartWS - start ws
+func StartWS(c *gin.Context) {
+	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Println("upgrade err:", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 
-func UnmarshalMsg(b []byte, msg *Message) error {
-	return msgpack.Unmarshal(b, msg)
+	defer ws.Close()
+
+	for {
+		mt, b, err := ws.ReadMessage()
+		if err != nil {
+			log.Println("read err:", err)
+		}
+
+		var msg *Message
+		if err = UnmarshalMsg(b, msg); err != nil {
+			log.Println("smg parse err:", err)
+			continue
+		}
+
+		log.Printf("[recv] %+v \n", msg)
+
+		err = ws.WriteMessage(mt, b)
+		if err != nil {
+			log.Println("write err:", err)
+		}
+	}
 }

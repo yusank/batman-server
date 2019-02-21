@@ -1,36 +1,19 @@
 package lib
 
 import (
-	"log"
-	"net/http"
-
-	"github.com/gorilla/websocket"
+	"github.com/vmihailenco/msgpack"
 )
 
-// Upgrader - ws upgrader
-var upgrader = websocket.Upgrader{}
+type Message struct {
+	Content  string
+	UserId   string
+	UnixTime int64
+}
 
-// Start - start ws
-func Start(w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("upgrade err:", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+func MarshallMsg(msg *Message) ([]byte, error) {
+	return msgpack.Marshal(msg)
+}
 
-	defer ws.Close()
-
-	for {
-		mt, msg, err := ws.ReadMessage()
-		if err != nil {
-			log.Println("read err:", err)
-		}
-
-		log.Println("got", msg)
-		err = ws.WriteMessage(mt, msg)
-		if err != nil {
-			log.Println("write err:", err)
-		}
-	}
+func UnmarshalMsg(b []byte, msg *Message) error {
+	return msgpack.Unmarshal(b, msg)
 }

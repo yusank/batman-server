@@ -1,0 +1,6 @@
+package: batman-server
+import:
+- package: github.com/gorilla/websocket
+  version: ^1.4.0
+- package: github.com/vmihailenco/msgpack
+  version: ^4.0.2
