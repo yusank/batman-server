@@ -30,6 +30,12 @@
     ws.onmessage = function(evt) {
       let data = deserializeMsgPack(evt.data)
       console.log(data)
+
+      var out = document.getElementById('output');
+      out.innerHTML += 'content:'+ data.content + '<br>';
+      out.innerHTML += 'userId:'+ data.userId + '<br>';
+      out.innerHTML += 'time:'+ data.unixTime + '<br>';
+      out.innerHTML += '<br>';
     }
 
     setInterval(function() {
