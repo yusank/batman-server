@@ -3,6 +3,7 @@ package lib
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -26,15 +27,21 @@ func StartWS(c *gin.Context) {
 		mt, b, err := ws.ReadMessage()
 		if err != nil {
 			log.Println("read err:", err)
+			return
 		}
 
-		var msg *Message
+		msg := new(Message)
 		if err = UnmarshalMsg(b, msg); err != nil {
-			log.Println("smg parse err:", err)
+			log.Println("msg parse err:", err, string(b))
 			continue
 		}
 
 		log.Printf("[recv] %+v \n", msg)
+		msg.UnixTime = time.Now().Unix()
+		b, err = MarshallMsg(msg)
+		if err != nil {
+			return
+		}
 
 		err = ws.WriteMessage(mt, b)
 		if err != nil {

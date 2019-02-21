@@ -16,6 +16,9 @@ func main() {
 	g.GET("/", func(c *gin.Context) {
 		c.File("./public/index.html")
 	})
+	g.GET("/msgpack.js", func(c *gin.Context) {
+		c.File("./public/msgpack.js")
+	})
 
 	g.Run(":8088")
 }
