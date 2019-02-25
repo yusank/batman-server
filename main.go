@@ -20,5 +20,9 @@ func main() {
 		c.File("./public/msgpack.js")
 	})
 
+	// go func() {
+	// 	temp.Service()
+	// }()
+
 	g.Run(":8088")
 }

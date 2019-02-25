@@ -3,6 +3,7 @@ package lib
 import (
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,12 @@ import (
 )
 
 // Upgrader - ws upgrader
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		// allow all connection
+		return true
+	},
+}
 
 // StartWS - start ws
 func StartWS(c *gin.Context) {
@@ -37,7 +43,7 @@ func StartWS(c *gin.Context) {
 		}
 
 		log.Printf("[recv] %+v \n", msg)
-		msg.UnixTime = time.Now().Unix()
+		msg.UnixTime = time.Now().UnixNano() / int64(time.Millisecond)
 		b, err = MarshallMsg(msg)
 		if err != nil {
 			return
@@ -48,4 +54,11 @@ func StartWS(c *gin.Context) {
 			log.Println("write err:", err)
 		}
 	}
+}
+
+func ConnectWS(uri, path string) (c *websocket.Conn, err error) {
+	u := url.URL{Scheme: "ws", Host: uri, Path: path}
+
+	c, _, err = websocket.DefaultDialer.Dial(u.String(), nil)
+	return
 }
